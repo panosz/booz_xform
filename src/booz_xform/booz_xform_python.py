@@ -1,5 +1,6 @@
 import numpy as np
 from ._booz_xform import Booz_xform as Booz_xform_cpp
+from .fourier_series import _calculate_fourier_series
 
 
 def _calculate_fourier_series(m, n, cos_mn_ampl, sin_mn_ampl, phi, theta):
@@ -13,7 +14,7 @@ def _calculate_fourier_series(m, n, cos_mn_ampl, sin_mn_ampl, phi, theta):
         angle = m_i * theta - n_i * phi
 
         out += cos_mn_ampl[jmn] * np.cos(angle)
-        if not sin_mn_ampl.size == 0:
+        if not sin_mn_ampl is None:
             out += sin_mn_ampl[jmn] * np.sin(angle)
 
     return out
@@ -39,7 +40,7 @@ class Booz_xform(Booz_xform_cpp):
         if self.asym:
             sin_ampl = self.bmns_b[:, js]
         else:
-            sin_ampl = np.array([])
+            sin_ampl = None
 
         return _calculate_fourier_series(self.xm_b,
                                          self.xn_b,
