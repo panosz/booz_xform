@@ -1,26 +1,23 @@
 import numpy as np
 from ._booz_xform import Booz_xform as Booz_xform_cpp
-from .fourier_series import _calculate_fourier_series
-
-
-def _calculate_fourier_series(m, n, cos_mn_ampl, sin_mn_ampl, phi, theta):
-
-    out = np.zeros_like(phi)
-
-    for jmn in range(len(m)):
-
-        m_i = m[jmn]
-        n_i = n[jmn]
-        angle = m_i * theta - n_i * phi
-
-        out += cos_mn_ampl[jmn] * np.cos(angle)
-        if not sin_mn_ampl is None:
-            out += sin_mn_ampl[jmn] * np.sin(angle)
-
-    return out
+from .fourier_series import _calculate_fourier_series, DoubleFourierSeries, ToroidalModel
 
 
 class Booz_xform(Booz_xform_cpp):
+
+    def mod_B_model(self):
+        if self.asym:
+            bmns_b = self.bmns_b
+        else:
+            bmns_b = None
+
+        return ToroidalModel(self.s_in,
+                             self.xm_b,
+                             self.xn_b,
+                             self.bmnc_b,
+                             bmns_b,
+                             deg=15
+                             )
 
     def calculate_modB_boozer_on_surface(self, js, phi, theta):
         """
@@ -42,11 +39,11 @@ class Booz_xform(Booz_xform_cpp):
         else:
             sin_ampl = None
 
-        return _calculate_fourier_series(self.xm_b,
-                                         self.xn_b,
-                                         cos_ampl,
-                                         sin_ampl,
-                                         phi,
-                                         theta,
-                                         )
+
+        fs = DoubleFourierSeries(self.xm_b,
+                                 self.xn_b,
+                                 cos_ampl,
+                                 sin_ampl,
+                                 )
+        return fs(phi, theta)
 
