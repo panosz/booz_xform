@@ -22,6 +22,48 @@ def _calculate_fourier_series(m, n, cos_mn_ampl, sin_mn_ampl, phi, theta):
     return out
 
 
+def _calculate_fourier_series_deriv(m,
+                                    n,
+                                    cos_mn_ampl,
+                                    sin_mn_ampl,
+                                    phi,
+                                    theta,
+                                    phi_order,
+                                    theta_order,
+                                    ):
+
+    r, s = int(phi_order), int(theta_order)
+    tot = r + s
+
+    preampl = m**s * (-n)**r
+
+    d_cos_ampl = preampl * cos_mn_ampl
+    d_sin_ampl = preampl * sin_mn_ampl
+
+    if tot % 4 == 0:
+        new_cos_ampl = d_cos_ampl
+        new_sin_ampl = d_sin_ampl
+
+    elif tot % 4 == 1:
+        new_cos_ampl = d_sin_ampl
+        new_sin_ampl = - d_cos_ampl
+
+    elif tot % 4 == 2:
+        new_cos_ampl = - d_cos_ampl
+        new_sin_ampl = - d_sin_ampl
+
+    else:  # tot % 4 == 3
+        new_cos_ampl = - d_sin_ampl
+        new_sin_ampl = d_cos_ampl
+
+    return _calculate_fourier_series(m,
+                                     n,
+                                     new_cos_ampl,
+                                     new_sin_ampl,
+                                     phi,
+                                     theta)
+
+
 class DoubleFourierSeries():
     """
     Represents a Fourier series on a 2-torus
@@ -62,6 +104,17 @@ class DoubleFourierSeries():
                                          phi,
                                          theta,
                                          )
+
+    def calculate_deriv(self, phi, theta, phi_order, theta_order):
+        return _calculate_fourier_series_deriv(self.m,
+                                               self.n,
+                                               self.cos_amplitudes,
+                                               self.sin_amplitudes,
+                                               phi,
+                                               theta,
+                                               phi_order,
+                                               theta_order
+                                               )
 
 
 class ToroidalModel():
