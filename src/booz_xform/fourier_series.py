@@ -5,6 +5,10 @@ import numpy as np
 from .polynomials import PolyCollection
 
 
+def is_scalar_and_zero(x):
+    return np.size(x) == 1 and x == 0
+
+
 def _calculate_fourier_series(m, n, cos_mn_ampl, sin_mn_ampl, phi, theta):
 
     out = np.zeros_like(phi)
@@ -15,8 +19,9 @@ def _calculate_fourier_series(m, n, cos_mn_ampl, sin_mn_ampl, phi, theta):
         n_i = n[jmn]
         angle = m_i * theta - n_i * phi
 
-        out += cos_mn_ampl[jmn] * np.cos(angle)
-        if sin_mn_ampl is not None:
+        if not is_scalar_and_zero(cos_mn_ampl):
+            out += cos_mn_ampl[jmn] * np.cos(angle)
+        if not is_scalar_and_zero(sin_mn_ampl):
             out += sin_mn_ampl[jmn] * np.sin(angle)
 
     return out
@@ -123,20 +128,19 @@ class ToroidalModel():
     embedeed tori.
     """
 
-    def _return_none(self, *args, **kwargs):
-        return None
+    def _return_zero(self, *args, **kwargs):
+        return 0
 
-    def __init__(self, s_in, m, n, cos_amplitudes, sin_amplitudes=None, deg=7):
+    def __init__(self, s_in, m, n, cos_amplitudes, sin_amplitudes=0, deg=7):
 
         self.m = np.array(m)
         self.n = np.array(n)
-        breakpoint()
         self.cos_ampls_model = PolyCollection.fit(s_in, cos_amplitudes, deg)
 
-        if sin_amplitudes is not None:
-            self.cos_ampls_model = PolyCollection.fit(s_in, sin_amplitudes, deg)
+        if not is_scalar_and_zero(sin_amplitudes):
+            self.sin_ampls_model = PolyCollection.fit(s_in, sin_amplitudes, deg)
         else:
-            self.sin_ampls_model = self._return_none
+            self.sin_ampls_model = self._return_zero
 
     def __call__(self, s_in, phi, theta):
         cos_ampls = self.cos_ampls_model(s_in)

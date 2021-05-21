@@ -9,7 +9,7 @@ class Booz_xform(Booz_xform_cpp):
         if self.asym:
             bmns_b = self.bmns_b
         else:
-            bmns_b = None
+            bmns_b = 0
 
         return ToroidalModel(self.s_in,
                              self.xm_b,
@@ -37,7 +37,7 @@ class Booz_xform(Booz_xform_cpp):
         if self.asym:
             sin_ampl = self.bmns_b[:, js]
         else:
-            sin_ampl = None
+            sin_ampl = 0
 
 
         fs = DoubleFourierSeries(self.xm_b,
