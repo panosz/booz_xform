@@ -11,13 +11,13 @@ class Booz_xform(Booz_xform_cpp):
         else:
             bmns_b = 0
 
-        return ToroidalModel(self.s_in,
-                             self.xm_b,
-                             self.xn_b,
-                             self.bmnc_b,
-                             bmns_b,
-                             deg=15
-                             )
+        return ToroidalModel.fit(self.s_in,
+                                 self.xm_b,
+                                 self.xn_b,
+                                 self.bmnc_b,
+                                 bmns_b,
+                                 deg=15
+                                 )
 
     def calculate_modB_boozer_on_surface(self, js, phi, theta):
         """

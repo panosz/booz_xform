@@ -122,25 +122,37 @@ class DoubleFourierSeries():
                                                )
 
 
+def _return_zero(self, *args, **kwargs):
+    return 0
+
+
 class ToroidalModel():
     """
     Represents a toroidal quantity as a collection of double fourier series in
     embedeed tori.
     """
 
-    def _return_zero(self, *args, **kwargs):
-        return 0
 
-    def __init__(self, s_in, m, n, cos_amplitudes, sin_amplitudes=0, deg=7):
+    def __init__(self, s_in, m, n, cos_ampls_model, sin_ampls_model):
 
         self.m = np.array(m)
         self.n = np.array(n)
-        self.cos_ampls_model = PolyCollection.fit(s_in, cos_amplitudes, deg)
+        self.cos_ampls_model = cos_ampls_model
+        self.sin_ampls_model = sin_ampls_model
+
+
+    @classmethod
+    def fit(cls, s_in, m, n, cos_amplitudes, sin_amplitudes=0, deg=7):
+        m = np.array(m)
+        n = np.array(n)
+        cos_ampls_model = PolyCollection.fit(s_in, cos_amplitudes, deg)
 
         if not is_scalar_and_zero(sin_amplitudes):
-            self.sin_ampls_model = PolyCollection.fit(s_in, sin_amplitudes, deg)
+            sin_ampls_model = PolyCollection.fit(s_in, sin_amplitudes, deg)
         else:
-            self.sin_ampls_model = self._return_zero
+            sin_ampls_model = _return_zero
+
+        return cls(s_in, m, n, cos_ampls_model, sin_ampls_model)
 
     def __call__(self, s_in, phi, theta):
         cos_ampls = self.cos_ampls_model(s_in)
