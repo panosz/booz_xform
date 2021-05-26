@@ -124,6 +124,16 @@ class TestDoubleFourierSeries(unittest.TestCase):
         nt.assert_allclose(actual, expected_result, atol=1e-10, rtol=1e-10)
 
 
+    def test_deriv_0_0_equivalent_to_original_function(self):
+        fs = self.get_fourier_series()
+
+        expected_result = fs(ZETA, THETA)
+
+        actual = fs.calculate_deriv(ZETA, THETA, phi_order=0, theta_order=0)
+
+        nt.assert_allclose(actual, expected_result, atol=1e-10, rtol=1e-10)
+
+
     def test_deriv_0_1(self):
         fs = self.get_fourier_series()
 
