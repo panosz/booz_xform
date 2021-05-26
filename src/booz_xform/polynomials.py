@@ -1,5 +1,11 @@
+"""
+Polynomial utilities
+Copyright © 2021 Panagiotis Zestanakis
+"""
+
 import numpy as np
 from numpy.polynomial import Polynomial as Poly
+
 
 class PolyCollection:
     """

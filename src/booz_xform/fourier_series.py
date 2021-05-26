@@ -1,5 +1,6 @@
 """
 Fourier series models
+Copyright © 2021 Panagiotis Zestanakis
 """
 import numpy as np
 from .polynomials import PolyCollection
