@@ -122,8 +122,16 @@ class DoubleFourierSeries():
                                                )
 
 
-def _return_zero(self, *args, **kwargs):
-    return 0
+class AlwaysReturnsZero:
+    def __init__(self, *args, **kwargs):
+        pass
+
+    def __call__(self, *args, **kwargs):
+        return 0
+
+    @classmethod
+    def deriv(cls, *args, **kwargs):
+        return cls()
 
 
 class ToroidalModel():
@@ -150,7 +158,7 @@ class ToroidalModel():
         if not is_scalar_and_zero(sin_amplitudes):
             sin_ampls_model = PolyCollection.fit(s_in, sin_amplitudes, deg)
         else:
-            sin_ampls_model = _return_zero
+            sin_ampls_model = AlwaysReturnsZero()
 
         return cls(s_in, m, n, cos_ampls_model, sin_ampls_model)
 
@@ -164,6 +172,27 @@ class ToroidalModel():
                                          phi,
                                          theta,
                                          )
+
+    #TODO: deriv should return a new model
+
+    #  def deriv(self, s_in, phi, theta, s_order, phi_order, theta_order):
+        #  c_deriv_ampls = self.cos_ampls_model.deriv(s_order)(s_in)
+        #  s_deriv_ampls = self.sin_ampls_model.deriv(s_order)(s_in)
+
+        #  breakpoint()
+
+        #  return _calculate_fourier_series_deriv(self.m,
+                                               #  self.n,
+                                               #  c_deriv_ampls,
+                                               #  s_deriv_ampls,
+                                               #  phi,
+                                               #  theta,
+                                               #  phi_order,
+                                               #  theta_order,
+                                               #  )
+
+
+
 
 
 
