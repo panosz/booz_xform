@@ -2,6 +2,8 @@
 Fourier series models
 Copyright © 2021 Panagiotis Zestanakis
 """
+from copy import copy
+
 import numpy as np
 from .polynomials import PolyCollection
 
@@ -203,7 +205,6 @@ class AlwaysReturnsZero:
         return cls()
 
 
-
 class ToroidalModel():
     """
     Represents a toroidal quantity as a collection of double fourier series in
@@ -211,17 +212,63 @@ class ToroidalModel():
 
     Parameters:
     -----------
-    m: array-like
-    n:
+    m: array-like, shape = (MNterms,)
+        The poloidal harmonics
+
+    n: array-like, shape = (MNterms,)
+        The toroidal harmonics
+    cos_ampls_model: callable,
+        The model for the cos amplitudes. See Notes
+
+    sin_ampls_model: callable,
+        The model for the sin amplitudes. See Notes
+
+    theta_phi_deriv_orders: optional
+        For internal use only. Should not be set by the user.
+        The orders of the fourier derivative calculated in _call_
+        Default is None.
+
+
+    Notes:
+    ------
+    The models `cos_ampls_model` and `sin_ampls_model` are callables that
+    return the cos and sin amplitudes at the given flux surface.  For a scalar
+    input s_scalar `cos_ampls_model(s_scalar)` should return an array with
+    shape = (MNterms,).
+
     """
 
+    class _FluxSurfaceDerivOrders:
+        def __init__(self, theta, phi):
+            self.theta = theta
+            self.phi = phi
 
-    def __init__(self, m, n, cos_ampls_model, sin_ampls_model):
+        def __repr__(self):
+            return f'({self.theta}, {self.phi})'
+
+        def __add__(self, other):
+            if other is None:
+                return copy(self)
+
+            cls = type(self)
+
+            if isinstance(other, cls):
+                theta = self.theta + other.theta
+                phi = self.phi + other.phi
+                return cls(theta, phi)
+
+            return NotImplemented
+
+        def __radd__(self, other):
+            return self.__add__(other)
+
+    def __init__(self, m, n, cos_ampls_model, sin_ampls_model, theta_phi_deriv_orders=None):
 
         self.m = np.array(m)
         self.n = np.array(n)
         self.cos_ampls_model = cos_ampls_model
         self.sin_ampls_model = sin_ampls_model
+        self._theta_phi_deriv_orders = theta_phi_deriv_orders
 
 
     @classmethod
@@ -237,34 +284,65 @@ class ToroidalModel():
 
         return cls(m, n, cos_ampls_model, sin_ampls_model)
 
+
+    # TODO: This should be calculated in a different method called
+    # calculate_on_flux_surface
+
     def __call__(self, s_in, theta, phi):
+
         cos_ampls = self.cos_ampls_model(s_in)
         sin_ampls = self.sin_ampls_model(s_in)
-        return _calculate_fourier_series(self.m,
-                                         self.n,
-                                         cos_ampls,
-                                         sin_ampls,
-                                         theta,
-                                         phi,
-                                         )
 
-    #TODO: deriv should return a new model
+        if self._theta_phi_deriv_orders is None:
+            return _calculate_fourier_series(self.m,
+                                             self.n,
+                                             cos_ampls,
+                                             sin_ampls,
+                                             theta,
+                                             phi,
+                                             )
 
-    #  def deriv(self, s_in, phi, theta, s_order, phi_order, theta_order):
-        #  c_deriv_ampls = self.cos_ampls_model.deriv(s_order)(s_in)
-        #  s_deriv_ampls = self.sin_ampls_model.deriv(s_order)(s_in)
+        else:
+            theta_order = self._theta_phi_deriv_orders.theta
+            phi_order = self._theta_phi_deriv_orders.phi
+            return _calculate_fourier_series_deriv(self.m,
+                                                   self.n,
+                                                   cos_ampls,
+                                                   sin_ampls,
+                                                   theta,
+                                                   phi,
+                                                   theta_order,
+                                                   phi_order,
+                                                   )
 
-        #  breakpoint()
+    def _calculate_next_deriv_order(self, theta_order, phi_order):
+        if theta_order > 0 or phi_order > 0:
+            extra_deriv = self._FluxSurfaceDerivOrders(theta_order,
+                                                       phi_order
+                                                       )
+        else:
+            extra_deriv = None
 
-        #  return _calculate_fourier_series_deriv(self.m,
-                                               #  self.n,
-                                               #  c_deriv_ampls,
-                                               #  s_deriv_ampls,
-                                               #  phi,
-                                               #  theta,
-                                               #  phi_order,
-                                               #  theta_order,
-                                               #  )
+        if self._theta_phi_deriv_orders is None and extra_deriv is None:
+            return None
+
+        return self._theta_phi_deriv_orders + extra_deriv
+
+
+    def deriv(self, s_order=0, theta_order=0, phi_order=0):
+        cos_deriv = self.cos_ampls_model.deriv(s_order)
+        sin_deriv = self.sin_ampls_model.deriv(s_order)
+
+        theta_phi_deriv_orders = self._calculate_next_deriv_order(theta_order,
+                                                                  phi_order)
+
+        return ToroidalModel(self.m,
+                             self.n,
+                             cos_deriv,
+                             sin_deriv,
+                             theta_phi_deriv_orders,
+                             )
+
 
 
 
