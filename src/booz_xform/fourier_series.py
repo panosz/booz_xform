@@ -10,6 +10,38 @@ def is_scalar_and_zero(x):
 
 
 def _calculate_fourier_series(m, n, cos_mn_ampl, sin_mn_ampl, phi, theta):
+    """
+    Calculates a double Fourier series at the poloidal angles `theta` and
+    toroidal angles `phi`.
+
+    Parameters:
+    -----------
+        m: array, shape(Nmn,)
+            The poloidal harmonic numbers
+
+        n: array, shape(Nmn,)
+            The toroidal harmonic numbers
+
+        cos_mn_ampl, sin_mn_ampl: array, shape(Nmn,)
+            The Fourier amplitudes
+
+        phi: array,
+            The toroidal positions
+
+        theta: array,
+            The poloidal positions
+
+    Returns:
+    --------
+        out: array, shape(phi.shape)
+            The series calculated at the given positions
+
+
+    Notes:
+    ------
+        `phi` and `theta` must have equal shape
+
+    """
 
     out = np.zeros_like(phi)
 
@@ -36,6 +68,41 @@ def _calculate_fourier_series_deriv(m,
                                     phi_order,
                                     theta_order,
                                     ):
+    """
+    Calculates the derivative of a double Fourier series at the poloidal angles
+    `theta` and toroidal angles `phi`.
+
+    Parameters:
+    -----------
+        m: array, shape(Nmn,)
+            The poloidal harmonic numbers
+
+        n: array, shape(Nmn,)
+            The toroidal harmonic numbers
+
+        cos_mn_ampl, sin_mn_ampl: array, shape(Nmn,)
+            The Fourier amplitudes
+
+        phi: array,
+            The toroidal positions
+
+        theta: array,
+            The poloidal positions
+
+        phi_order, theta_order: int, positive
+            The order of the derivative
+
+    Returns:
+    --------
+        out: array, shape(phi.shape)
+            The derivative of the series calculated at the given positions
+
+
+    Notes:
+    ------
+        `phi` and `theta` must have equal shape
+
+    """
 
     r, s = int(phi_order), int(theta_order)
     tot = r + s
@@ -134,14 +201,20 @@ class AlwaysReturnsZero:
         return cls()
 
 
+
 class ToroidalModel():
     """
     Represents a toroidal quantity as a collection of double fourier series in
     embedeed tori.
+
+    Parameters:
+    -----------
+    m: array-like
+    n:
     """
 
 
-    def __init__(self, s_in, m, n, cos_ampls_model, sin_ampls_model):
+    def __init__(self, m, n, cos_ampls_model, sin_ampls_model):
 
         self.m = np.array(m)
         self.n = np.array(n)
@@ -160,7 +233,7 @@ class ToroidalModel():
         else:
             sin_ampls_model = AlwaysReturnsZero()
 
-        return cls(s_in, m, n, cos_ampls_model, sin_ampls_model)
+        return cls(m, n, cos_ampls_model, sin_ampls_model)
 
     def __call__(self, s_in, phi, theta):
         cos_ampls = self.cos_ampls_model(s_in)
