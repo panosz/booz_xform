@@ -19,7 +19,7 @@ class TestDoubleFourierSeries(unittest.TestCase):
     """
 
 
-    def explicit_fourier_series(self, zeta, theta):
+    def explicit_fourier_series(self, theta, zeta):
         out = 3 * np.cos(2 * theta - 3 * zeta) \
             + 4 * np.sin(6 * theta - 2 * zeta)
 
@@ -35,7 +35,7 @@ class TestDoubleFourierSeries(unittest.TestCase):
 
         return DoubleFourierSeries(m, n, cos_mn_ampl, sin_mn_ampl)
 
-    def explicit_fourier_series_deriv_0_1(self, zeta, theta):
+    def explicit_fourier_series_deriv_1_0(self, theta, zeta):
         """
         The first derivative wrt theta
         """
@@ -44,7 +44,7 @@ class TestDoubleFourierSeries(unittest.TestCase):
         return out
 
 
-    def explicit_fourier_series_deriv_1_0(self, zeta, theta):
+    def explicit_fourier_series_deriv_0_1(self, theta, zeta):
         """
         The first derivative wrt zeta
         """
@@ -52,7 +52,7 @@ class TestDoubleFourierSeries(unittest.TestCase):
             + 9*np.sin(2*theta - 3*zeta)
         return out
 
-    def explicit_fourier_series_deriv_1_1(self, zeta, theta):
+    def explicit_fourier_series_deriv_1_1(self, theta, zeta):
         R"""
         d^2 / d\zeta d\theta
         """
@@ -61,7 +61,7 @@ class TestDoubleFourierSeries(unittest.TestCase):
         return out
 
 
-    def explicit_fourier_series_deriv_2_0(self, zeta, theta):
+    def explicit_fourier_series_deriv_0_2(self, theta, zeta):
         R"""
         d^2 / d\zeta^2
         """
@@ -69,42 +69,42 @@ class TestDoubleFourierSeries(unittest.TestCase):
             - 16*np.sin(6*theta - 2*zeta)
         return out
 
-    def explicit_fourier_series_deriv_0_2(self, zeta, theta):
+    def explicit_fourier_series_deriv_2_0(self, theta, zeta):
         R"""
         d^2 / d\theta^2
         """
         out = -12*np.cos(2*theta - 3*zeta) - 144*np.sin(6*theta - 2*zeta)
         return out
 
-    def explicit_fourier_series_deriv_1_2(self, zeta, theta):
+    def explicit_fourier_series_deriv_2_1(self, theta, zeta):
         R"""
         d^3 / d\zeta d\theta^2
         """
         out = 288*np.cos(6*theta - 2*zeta) - 36*np.sin(2*theta - 3*zeta)
         return out
 
-    def explicit_fourier_series_deriv_3_0(self, zeta, theta):
+    def explicit_fourier_series_deriv_0_3(self, theta, zeta):
         R"""
         d^3 / d\zeta^3
         """
         out = 32*np.cos(6*theta - 2*zeta) - 81*np.sin(2*theta - 3*zeta)
         return out
 
-    def explicit_fourier_series_deriv_2_2(self, zeta, theta):
+    def explicit_fourier_series_deriv_2_2(self, theta, zeta):
         R"""
         d^4 / d\zeta^2 d\theta^2
         """
         out = 108*np.cos(2*theta - 3*zeta) + 576*np.sin(6*theta - 2*zeta)
         return out
 
-    def explicit_fourier_series_deriv_3_1(self, zeta, theta):
+    def explicit_fourier_series_deriv_1_3(self, theta, zeta):
         R"""
         d^4 / d\zeta^3 d\theta^1
         """
         out = -162*np.cos(2*theta - 3*zeta) - 192*np.sin(6*theta - 2*zeta)
         return out
 
-    def explicit_fourier_series_deriv_5_7(self, zeta, theta):
+    def explicit_fourier_series_deriv_7_5(self, theta, zeta):
         R"""
         d^4 / d\zeta^3 d\theta^1
         """
@@ -117,9 +117,9 @@ class TestDoubleFourierSeries(unittest.TestCase):
 
         fs = self.get_fourier_series()
 
-        expected_result = self.explicit_fourier_series(ZETA, THETA)
+        expected_result = self.explicit_fourier_series(THETA, ZETA)
 
-        actual = fs(ZETA, THETA)
+        actual = fs(THETA, ZETA)
 
         nt.assert_allclose(actual, expected_result, atol=1e-10, rtol=1e-10)
 
@@ -127,19 +127,9 @@ class TestDoubleFourierSeries(unittest.TestCase):
     def test_deriv_0_0_equivalent_to_original_function(self):
         fs = self.get_fourier_series()
 
-        expected_result = fs(ZETA, THETA)
+        expected_result = fs(THETA, ZETA)
 
-        actual = fs.calculate_deriv(ZETA, THETA, phi_order=0, theta_order=0)
-
-        nt.assert_allclose(actual, expected_result, atol=1e-10, rtol=1e-10)
-
-
-    def test_deriv_0_1(self):
-        fs = self.get_fourier_series()
-
-        expected_result = self.explicit_fourier_series_deriv_0_1(ZETA, THETA)
-
-        actual = fs.calculate_deriv(ZETA, THETA, phi_order=0, theta_order=1)
+        actual = fs.calculate_deriv(THETA, ZETA, theta_order=0, phi_order=0)
 
         nt.assert_allclose(actual, expected_result, atol=1e-10, rtol=1e-10)
 
@@ -147,9 +137,19 @@ class TestDoubleFourierSeries(unittest.TestCase):
     def test_deriv_1_0(self):
         fs = self.get_fourier_series()
 
-        expected_result = self.explicit_fourier_series_deriv_1_0(ZETA, THETA)
+        expected_result = self.explicit_fourier_series_deriv_1_0(THETA, ZETA)
 
-        actual = fs.calculate_deriv(ZETA, THETA, phi_order=1, theta_order=0)
+        actual = fs.calculate_deriv(THETA, ZETA, theta_order=1, phi_order=0)
+
+        nt.assert_allclose(actual, expected_result, atol=1e-10, rtol=1e-10)
+
+
+    def test_deriv_0_1(self):
+        fs = self.get_fourier_series()
+
+        expected_result = self.explicit_fourier_series_deriv_0_1(THETA, ZETA)
+
+        actual = fs.calculate_deriv(THETA, ZETA, theta_order=0, phi_order=1)
 
         nt.assert_allclose(actual, expected_result, atol=1e-10, rtol=1e-10)
 
@@ -157,19 +157,9 @@ class TestDoubleFourierSeries(unittest.TestCase):
     def test_deriv_1_1(self):
         fs = self.get_fourier_series()
 
-        expected_result = self.explicit_fourier_series_deriv_1_1(ZETA, THETA)
+        expected_result = self.explicit_fourier_series_deriv_1_1(THETA, ZETA)
 
-        actual = fs.calculate_deriv(ZETA, THETA, phi_order=1, theta_order=1)
-
-        nt.assert_allclose(actual, expected_result, atol=1e-10, rtol=1e-10)
-
-
-    def test_deriv_2_0(self):
-        fs = self.get_fourier_series()
-
-        expected_result = self.explicit_fourier_series_deriv_2_0(ZETA, THETA)
-
-        actual = fs.calculate_deriv(ZETA, THETA, phi_order=2, theta_order=0)
+        actual = fs.calculate_deriv(THETA, ZETA, theta_order=1, phi_order=1)
 
         nt.assert_allclose(actual, expected_result, atol=1e-10, rtol=1e-10)
 
@@ -177,54 +167,64 @@ class TestDoubleFourierSeries(unittest.TestCase):
     def test_deriv_0_2(self):
         fs = self.get_fourier_series()
 
-        expected_result = self.explicit_fourier_series_deriv_0_2(ZETA, THETA)
+        expected_result = self.explicit_fourier_series_deriv_0_2(THETA, ZETA)
 
-        actual = fs.calculate_deriv(ZETA, THETA, phi_order=0, theta_order=2)
-
-        nt.assert_allclose(actual, expected_result, atol=1e-10, rtol=1e-10)
-
-    def test_deriv_1_2(self):
-        fs = self.get_fourier_series()
-
-        expected_result = self.explicit_fourier_series_deriv_1_2(ZETA, THETA)
-
-        actual = fs.calculate_deriv(ZETA, THETA, phi_order=1, theta_order=2)
+        actual = fs.calculate_deriv(THETA, ZETA, theta_order=0, phi_order=2)
 
         nt.assert_allclose(actual, expected_result, atol=1e-10, rtol=1e-10)
 
-    def test_deriv_3_0(self):
+
+    def test_deriv_2_0(self):
         fs = self.get_fourier_series()
 
-        expected_result = self.explicit_fourier_series_deriv_3_0(ZETA, THETA)
+        expected_result = self.explicit_fourier_series_deriv_2_0(THETA, ZETA)
 
-        actual = fs.calculate_deriv(ZETA, THETA, phi_order=3, theta_order=0)
+        actual = fs.calculate_deriv(THETA, ZETA, theta_order=2, phi_order=0)
+
+        nt.assert_allclose(actual, expected_result, atol=1e-10, rtol=1e-10)
+
+    def test_deriv_2_1(self):
+        fs = self.get_fourier_series()
+
+        expected_result = self.explicit_fourier_series_deriv_2_1(THETA, ZETA)
+
+        actual = fs.calculate_deriv(THETA, ZETA, theta_order=2, phi_order=1)
+
+        nt.assert_allclose(actual, expected_result, atol=1e-10, rtol=1e-10)
+
+    def test_deriv_0_3(self):
+        fs = self.get_fourier_series()
+
+        expected_result = self.explicit_fourier_series_deriv_0_3(THETA, ZETA)
+
+        actual = fs.calculate_deriv(THETA, ZETA, theta_order=0, phi_order=3)
 
         nt.assert_allclose(actual, expected_result, atol=1e-10, rtol=1e-10)
 
     def test_deriv_2_2(self):
         fs = self.get_fourier_series()
 
-        expected_result = self.explicit_fourier_series_deriv_2_2(ZETA, THETA)
+        expected_result = self.explicit_fourier_series_deriv_2_2(THETA, ZETA)
 
-        actual = fs.calculate_deriv(ZETA, THETA, phi_order=2, theta_order=2)
-
-        nt.assert_allclose(actual, expected_result, atol=1e-10, rtol=1e-10)
-
-    def test_deriv_3_1(self):
-        fs = self.get_fourier_series()
-
-        expected_result = self.explicit_fourier_series_deriv_3_1(ZETA, THETA)
-
-        actual = fs.calculate_deriv(ZETA, THETA, phi_order=3, theta_order=1)
+        actual = fs.calculate_deriv(THETA, ZETA, theta_order=2, phi_order=2)
 
         nt.assert_allclose(actual, expected_result, atol=1e-10, rtol=1e-10)
 
-    def test_deriv_5_7(self):
+    def test_deriv_1_3(self):
         fs = self.get_fourier_series()
 
-        expected_result = self.explicit_fourier_series_deriv_5_7(ZETA, THETA)
+        expected_result = self.explicit_fourier_series_deriv_1_3(THETA, ZETA)
 
-        actual = fs.calculate_deriv(ZETA, THETA, phi_order=5, theta_order=7)
+        actual = fs.calculate_deriv(THETA, ZETA, theta_order=1, phi_order=3)
+
+        nt.assert_allclose(actual, expected_result, atol=1e-10, rtol=1e-10)
+
+    def test_deriv_7_5(self):
+        fs = self.get_fourier_series()
+
+        expected_result = self.explicit_fourier_series_deriv_7_5(THETA, ZETA)
+
+        actual = fs.calculate_deriv(THETA, ZETA, theta_order=7, phi_order=5)
 
         nt.assert_allclose(actual, expected_result, atol=1e-10, rtol=1e-10)
 

@@ -19,7 +19,7 @@ class Booz_xform(Booz_xform_cpp):
                                  deg=15
                                  )
 
-    def calculate_modB_boozer_on_surface(self, js, phi, theta):
+    def calculate_modB_boozer_on_surface(self, js, theta, phi):
         """
         Calculates :math:`|B|` on a surface in Boozer poloidal and toroidal
         angles.
@@ -45,19 +45,19 @@ class Booz_xform(Booz_xform_cpp):
                                  cos_ampl,
                                  sin_ampl,
                                  )
-        return fs(phi, theta)
+        return fs(theta, phi)
 
 
-    def calculate_modB_boozer_deriv_on_surface(self, js, phi, theta, phi_order, theta_order):
+    def calculate_modB_boozer_deriv_on_surface(self, js, theta, phi, theta_order, phi_order):
         """
         Calculates :math:`|B|` on a surface in Boozer poloidal and toroidal
         angles.
         Args:
           js (int): The index among the output surfaces.
-          phi (array-like): The toroidal angle values.
           theta (array-like): The poloidal angle values.
-          phi_order (int, positive): The order of the phi derivative
+          phi (array-like): The toroidal angle values.
           theta_order (int, positive): The order of the theta derivative
+          phi_order (int, positive): The order of the phi derivative
         """
 
         phi = np.asanyarray(phi, dtype=np.float)
@@ -76,5 +76,5 @@ class Booz_xform(Booz_xform_cpp):
                                  cos_ampl,
                                  sin_ampl,
                                  )
-        return fs.calculate_deriv(phi, theta, phi_order, theta_order)
+        return fs.calculate_deriv(theta, phi, theta_order, phi_order)
 

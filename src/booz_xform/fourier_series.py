@@ -9,7 +9,7 @@ def is_scalar_and_zero(x):
     return np.size(x) == 1 and x == 0
 
 
-def _calculate_fourier_series(m, n, cos_mn_ampl, sin_mn_ampl, phi, theta):
+def _calculate_fourier_series(m, n, cos_mn_ampl, sin_mn_ampl, theta, phi):
     """
     Calculates a double Fourier series at the poloidal angles `theta` and
     toroidal angles `phi`.
@@ -25,11 +25,11 @@ def _calculate_fourier_series(m, n, cos_mn_ampl, sin_mn_ampl, phi, theta):
         cos_mn_ampl, sin_mn_ampl: array, shape(Nmn,)
             The Fourier amplitudes
 
-        phi: array,
-            The toroidal positions
-
         theta: array,
             The poloidal positions
+
+        phi: array,
+            The toroidal positions
 
     Returns:
     --------
@@ -63,10 +63,10 @@ def _calculate_fourier_series_deriv(m,
                                     n,
                                     cos_mn_ampl,
                                     sin_mn_ampl,
-                                    phi,
                                     theta,
-                                    phi_order,
+                                    phi,
                                     theta_order,
+                                    phi_order,
                                     ):
     """
     Calculates the derivative of a double Fourier series at the poloidal angles
@@ -83,13 +83,13 @@ def _calculate_fourier_series_deriv(m,
         cos_mn_ampl, sin_mn_ampl: array, shape(Nmn,)
             The Fourier amplitudes
 
-        phi: array,
-            The toroidal positions
-
         theta: array,
             The poloidal positions
 
-        phi_order, theta_order: int, positive
+        phi: array,
+            The toroidal positions
+
+        theta_order, phi_order: int, positive
             The order of the derivative
 
     Returns:
@@ -132,8 +132,9 @@ def _calculate_fourier_series_deriv(m,
                                      n,
                                      new_cos_ampl,
                                      new_sin_ampl,
+                                     theta,
                                      phi,
-                                     theta)
+                                     )
 
 
 class DoubleFourierSeries():
@@ -168,24 +169,24 @@ class DoubleFourierSeries():
         else:
             self.sin_amplitudes = None
 
-    def __call__(self, phi, theta):
+    def __call__(self, theta, phi):
         return _calculate_fourier_series(self.m,
                                          self.n,
                                          self.cos_amplitudes,
                                          self.sin_amplitudes,
-                                         phi,
                                          theta,
+                                         phi,
                                          )
 
-    def calculate_deriv(self, phi, theta, phi_order, theta_order):
+    def calculate_deriv(self, theta, phi, theta_order, phi_order):
         return _calculate_fourier_series_deriv(self.m,
                                                self.n,
                                                self.cos_amplitudes,
                                                self.sin_amplitudes,
-                                               phi,
                                                theta,
+                                               phi,
+                                               theta_order,
                                                phi_order,
-                                               theta_order
                                                )
 
 
@@ -235,15 +236,15 @@ class ToroidalModel():
 
         return cls(m, n, cos_ampls_model, sin_ampls_model)
 
-    def __call__(self, s_in, phi, theta):
+    def __call__(self, s_in, theta, phi):
         cos_ampls = self.cos_ampls_model(s_in)
         sin_ampls = self.sin_ampls_model(s_in)
         return _calculate_fourier_series(self.m,
                                          self.n,
                                          cos_ampls,
                                          sin_ampls,
-                                         phi,
                                          theta,
+                                         phi,
                                          )
 
     #TODO: deriv should return a new model
