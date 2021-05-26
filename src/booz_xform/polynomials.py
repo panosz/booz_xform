@@ -9,7 +9,21 @@ class PolyCollection:
         self.polys = polys
 
     def __call__(self, x_i):
+        """
+        calclulate the collection at `xi`
+
+        Returns:
+        out, array shape = (Npoly,) or (Npoly, Nx_i)
+            For scalar input, the output is a vector of size `Npoly`.
+            For vector input, the output is a 2D array of shape (Npoly, Nx_i)
+        """
         x_i = np.ravel(x_i)
+        if np.size(x_i) == 0:
+            return np.array([])
+
+        if np.size(x_i) == 1:
+            return np.concatenate([p(x_i) for p in self])
+
         return np.vstack([p(x_i) for p in self])
 
     def __iter__(self):
