@@ -8,7 +8,11 @@ import booz_xform as bx
 
 TEST_DIR = os.path.join(os.path.dirname(__file__), 'test_files')
 
+
 class PlotTest(unittest.TestCase):
+    def setUp(self):
+        raise unittest.SkipTest("Skipping plot tests")
+
     def test_calling_plots(self):
         """
         Try calling the plotting functions. Because plt.show() is not
