@@ -9,6 +9,7 @@ from booz_xform.polynomials import MultiPoly
 RANDOM_GENERATOR = np.random.default_rng(seed=42)
 X = 10 * RANDOM_GENERATOR.random(50) - 5
 
+X_i = 10 * RANDOM_GENERATOR.random(50) - 5
 
 
 class TestMultiPoly(unittest.TestCase):
@@ -73,6 +74,25 @@ class TestMultiPoly(unittest.TestCase):
 
         p2 = self.get_multi_poly().deriv(2)
         nt.assert_allclose(p2(X), self.explicit_polys_deriv_2(X))
+
+    def test_fit(self):
+        y_i = self.explicit_polys(X_i)
+
+        p = MultiPoly.fit(X_i, y_i, 6)
+
+        nt.assert_allclose(p(X), self.explicit_polys(X))
+
+    def test_restricted_fit(self):
+        y_i = self.explicit_polys(X_i)
+
+        x0 = [-3, 1]
+        p = MultiPoly.fit_fixed_constant_term(X_i, y_i, x0 , 9)
+
+        nt.assert_equal(p.coef[:, 0], x0)
+
+        nt.assert_allclose(p(X), self.explicit_polys(X))
+
+
 
 if __name__ == '__main__':
     unittest.main()
