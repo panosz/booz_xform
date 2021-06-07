@@ -143,10 +143,10 @@ class MultiPoly():
 
         Parameters
         ----------
-        x : array_like, shape (M,)
-            x-coordinates of the M sample points ``(x[i], y[i])``.
+        x : array_like, shape (`M`,)
+            x-coordinates of the `M` sample points ``(x[i], y[i])``.
 
-        y: array like, shape (K, M)
+        y: array like, shape (`K`, `M`)
             y-coordinates of the sample points. Several data sets of sample
             points sharing the same x-coordinates can be fitted at once by
             passing in a 2D-array that contains one dataset per row.
@@ -176,17 +176,42 @@ class MultiPoly():
         return cls(coef, domain=domain, window=window)
 
     @classmethod
-    def fit_fixed_constant_term(cls, x, y, x0, deg):
-        """Least squares fit to data.
+    def fit_fixed_constant_term(cls, x, y, c0, deg):
+        """
+        Least squares fit to data. But keep the constant terms fixed.
+        Return a series instance that is the least squares fit to the data `y`
+        sampled at `x`.
+
+        Unlike `fit`, here no domain mapping is performed. Consequently, fixing
+        the constant terms is equivalent to fixing the value of the returned
+        polynomial at `x=0`
+
+        Parameters
+        ----------
+        x : array_like, shape (`M`,)
+            x-coordinates of the `M` sample points ``(x[i], y[i])``.
+
+        y: array like, shape (`K`, `M`)
+            y-coordinates of the sample points. Several data sets of sample
+            points sharing the same x-coordinates can be fitted at once by
+            passing in a 2D-array that contains one dataset per row.
+
+        c0: float or array_like, shape (`K`).
+            The constant coefficients of each polynomial series.
+
+        deg : int or 1-D array_like
+            Degree(s) of the fitting polynomials. If `deg` is a single integer
+            all terms up to and including the `deg`'th term are included in the
+            fit.
         """
 
         domain = [-1, 1]
         window = [-1, 1]
 
-        x0 = np.asarray(x0)
+        c0 = np.asarray(c0)
         y = np.asarray(y)
 
-        coefs = polyfit_fit_constant_term(x, y.T, x0, deg)
+        coefs = polyfit_fit_constant_term(x, y.T, c0, deg)
 
         return cls(coefs.T, domain=domain, window=window)
 
@@ -195,20 +220,41 @@ def _restricted_vander(x, deg):
     return polyvander(x, deg)[..., 1:]
 
 
-def polyfit_fit_constant_term(x, y, x0, deg):
+def polyfit_fit_constant_term(x, y, c0, deg):
     """
     modified from numpy.polynomial.polyutils._fit
     Helper function used to implement the ``<type>fit`` functions.
 
+    Calculate the polynomial coefficients by fitting to data, but keep the
+    constant terms fixed.
+
     Parameters
     ----------
-    vander_f : function(array_like, int) -> ndarray
-        The 1d vander function, such as ``polyvander``
-    c1, c2 :
-        See the ``<type>fit`` functions for more detail
+    x : array_like, shape (`M`,)
+        x-coordinates of the `M` sample (data) points ``(x[i], y[i])``.
+    y : array_like, shape (`M`,) or (`M`, `K`)
+        y-coordinates of the sample points.  Several sets of sample points
+        sharing the same x-coordinates can be (independently) fit with one
+        call to `polyfit` by passing in for `y` a 2-D array that contains
+        one data set per column.
+    c0: float or array_like, shape (`K`).
+        The constant coefficients of each polynomial series.
+    deg : int or 1-D array_like
+        Degree(s) of the fitting polynomials. If `deg` is a single integer
+        all terms up to and including the `deg`'th term are included in the
+        fit. For NumPy versions >= 1.11.0 a list of integers specifying the
+        degrees of the terms to include may be used instead.
+
+    Returns
+    -------
+    coef : ndarray, shape (`deg` + 1,) or (`deg` + 1, `K`)
+        Polynomial coefficients ordered from low to high.  If `y` was 2-D,
+        the coefficients in column `k` of `coef` represent the polynomial
+        fit to the data in `y`'s `k`-th column.
+
     """
     x = np.asarray(x) + 0.0
-    x0 = np.asarray(x0) + 0.0
+    c0 = np.asarray(c0) + 0.0
     y = np.asarray(y) + 0.0
     deg = np.asarray(deg)
 
@@ -225,6 +271,8 @@ def polyfit_fit_constant_term(x, y, x0, deg):
         raise TypeError("expected 1D or 2D array for y")
     if len(x) != len(y):
         raise TypeError("expected x and y to have same length")
+    if (y.ndim == 1 and c0.size != 1) or (y.ndim > 1 and y.shape[-1] != c0.size):
+        raise TypeError("incompatible sizes of y and c0")
 
     lmax = deg
     order = lmax
@@ -232,7 +280,7 @@ def polyfit_fit_constant_term(x, y, x0, deg):
 
     # set up the least squares matrices in transposed form
     lhs = van.T
-    rhs = (y - x0).T
+    rhs = (y - c0).T
 
     rcond = len(x)*np.finfo(x.dtype).eps
 
@@ -252,7 +300,10 @@ def polyfit_fit_constant_term(x, y, x0, deg):
         msg = "The fit may be poorly conditioned"
         warnings.warn(msg, pu.RankWarning, stacklevel=2)
 
-    c = np.vstack((x0[np.newaxis, ...], c))
+    if c.ndim > 1:
+        c = np.vstack((c0[np.newaxis, ...], c))
+    else:
+        c = np.append(c0, c)
 
     return c
 

@@ -82,15 +82,42 @@ class TestMultiPoly(unittest.TestCase):
 
         nt.assert_allclose(p(X), self.explicit_polys(X))
 
+    def test_fit_single_poly(self):
+        y_i = self.explicit_poly1(X_i)
+
+        p = MultiPoly.fit(X_i, y_i, 6)
+
+        nt.assert_allclose(p(X), self.explicit_poly1(X))
+
     def test_restricted_fit(self):
         y_i = self.explicit_polys(X_i)
 
-        x0 = [-3, 1]
-        p = MultiPoly.fit_fixed_constant_term(X_i, y_i, x0 , 9)
+        c0 = [-3, 1]
+        p = MultiPoly.fit_fixed_constant_term(X_i, y_i, c0 , 9)
 
-        nt.assert_equal(p.coef[:, 0], x0)
+        nt.assert_equal(p.coef[:, 0], c0)
 
         nt.assert_allclose(p(X), self.explicit_polys(X))
+
+    def test_restricted_fit_single_poly(self):
+        y_i = self.explicit_poly2(X_i)
+
+        c0 = 1.0
+        p = MultiPoly.fit_fixed_constant_term(X_i, y_i, c0, 9)
+
+        nt.assert_equal(p.coef[0], c0)
+
+        nt.assert_allclose(p(X), self.explicit_poly2(X))
+
+    def test_restricted_fit_bad_c0(self):
+        y_i = self.explicit_polys(X_i)
+
+        c0_with_more_elements = [-3, 1, 4]
+        with self.assertRaises(TypeError):
+            MultiPoly.fit_fixed_constant_term(X_i,
+                                              y_i,
+                                              c0_with_more_elements,
+                                              9)
 
 
 
