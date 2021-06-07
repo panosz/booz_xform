@@ -5,7 +5,7 @@ Copyright © 2021 Panagiotis Zestanakis
 from copy import copy
 
 import numpy as np
-from .polynomials import PolyCollection
+from .polynomials import MultiPoly as PolyModel
 
 
 def is_scalar_and_zero(x):
@@ -275,10 +275,10 @@ class ToroidalModel():
     def fit(cls, s_in, m, n, cos_amplitudes, sin_amplitudes=0, deg=7):
         m = np.array(m)
         n = np.array(n)
-        cos_ampls_model = PolyCollection.fit(s_in, cos_amplitudes, deg)
+        cos_ampls_model = PolyModel.fit(s_in, cos_amplitudes, deg)
 
         if not is_scalar_and_zero(sin_amplitudes):
-            sin_ampls_model = PolyCollection.fit(s_in, sin_amplitudes, deg)
+            sin_ampls_model = PolyModel.fit(s_in, sin_amplitudes, deg)
         else:
             sin_ampls_model = AlwaysReturnsZero()
 
