@@ -57,6 +57,7 @@ class TestMultiPoly(unittest.TestCase):
     def get_multi_poly(self):
         return MultiPoly([[-3, -2, 1, 0], [1, 0, -1, 3]])
 
+
     def test_single_poly_assingement(self):
         p1 = MultiPoly([-3, -2, 1])
         nt.assert_allclose(p1(X), self.explicit_poly1(X))
@@ -67,6 +68,15 @@ class TestMultiPoly(unittest.TestCase):
     def test_multi_poly_assingement(self):
         p = self.get_multi_poly()
         nt.assert_allclose(p(X), self.explicit_polys(X))
+
+    def test_output_shape_for_scalar_input(self):
+        p = self.get_multi_poly()
+        x_scalar_cases = [1, np.array(1)]
+
+        for x in x_scalar_cases:
+            y = p(x)
+
+            assert y.shape == (2,)
 
     def test_multi_poly_deriv_1(self):
         p1 = self.get_multi_poly().deriv(1)
