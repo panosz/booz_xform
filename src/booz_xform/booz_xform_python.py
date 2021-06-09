@@ -11,7 +11,7 @@ class Booz_xform(Booz_xform_cpp):
         else:
             bmns_b = 0
 
-        return ToroidalModel.fit(self.s_in,
+        return ToroidalModel.fit(self.s_b,
                                  self.xm_b,
                                  self.xn_b,
                                  self.bmnc_b,
