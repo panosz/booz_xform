@@ -60,8 +60,8 @@ class Booz_xform(Booz_xform_cpp):
           phi_order (int, positive): The order of the phi derivative
         """
 
-        phi = np.asanyarray(phi, dtype=np.float)
-        theta = np.asanyarray(theta, dtype=np.float)
+        phi = np.asanyarray(phi, dtype=float)
+        theta = np.asanyarray(theta, dtype=float)
 
         cos_ampl = self.bmnc_b[:, js]
 
