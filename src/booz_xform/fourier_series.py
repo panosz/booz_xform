@@ -272,13 +272,13 @@ class ToroidalModel():
 
 
     @classmethod
-    def fit(cls, s_in, m, n, cos_amplitudes, sin_amplitudes=0, deg=7):
+    def fit(cls, r, m, n, cos_amplitudes, sin_amplitudes=0, deg=7):
         m = np.array(m)
         n = np.array(n)
-        cos_ampls_model = PolyModel.fit(s_in, cos_amplitudes, deg)
+        cos_ampls_model = PolyModel.fit(r, cos_amplitudes, deg)
 
         if not is_scalar_and_zero(sin_amplitudes):
-            sin_ampls_model = PolyModel.fit(s_in, sin_amplitudes, deg)
+            sin_ampls_model = PolyModel.fit(r, sin_amplitudes, deg)
         else:
             sin_ampls_model = AlwaysReturnsZero()
 
@@ -288,10 +288,10 @@ class ToroidalModel():
     # TODO: This should be calculated in a different method called
     # calculate_on_flux_surface
 
-    def __call__(self, s_in, theta, phi):
+    def __call__(self, r, theta, phi):
 
-        cos_ampls = self.cos_ampls_model(s_in)
-        sin_ampls = self.sin_ampls_model(s_in)
+        cos_ampls = self.cos_ampls_model(r)
+        sin_ampls = self.sin_ampls_model(r)
 
         if self._theta_phi_deriv_orders is None:
             return _calculate_fourier_series(self.m,
@@ -329,9 +329,9 @@ class ToroidalModel():
         return self._theta_phi_deriv_orders + extra_deriv
 
 
-    def deriv(self, s_order=0, theta_order=0, phi_order=0):
-        cos_deriv = self.cos_ampls_model.deriv(s_order)
-        sin_deriv = self.sin_ampls_model.deriv(s_order)
+    def deriv(self, r_order=0, theta_order=0, phi_order=0):
+        cos_deriv = self.cos_ampls_model.deriv(r_order)
+        sin_deriv = self.sin_ampls_model.deriv(r_order)
 
         theta_phi_deriv_orders = self._calculate_next_deriv_order(theta_order,
                                                                   phi_order)

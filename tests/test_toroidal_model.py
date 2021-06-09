@@ -93,12 +93,12 @@ class TestToroidalModelByMeansOfBoozMagneticField(unittest.TestCase):
 
         s_flux = BOOZ.s_in[J_SURFACE]
 
-        dB3_dall_model1 = BOOZ.mod_B_model().deriv(s_order=1,
+        dB3_dall_model1 = BOOZ.mod_B_model().deriv(r_order=1,
                                                    theta_order=1,
                                                    phi_order=1,
                                                    )
         dB3_dall_model2 = BOOZ.mod_B_model().deriv(
-            s_order=1).deriv(theta_order=1).deriv(phi_order=1)
+            r_order=1).deriv(theta_order=1).deriv(phi_order=1)
 
         nt.assert_allclose(dB3_dall_model1(s_flux, THETA, PHI),
                            dB3_dall_model2(s_flux, THETA, PHI),
