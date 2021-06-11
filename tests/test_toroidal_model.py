@@ -51,7 +51,7 @@ class TestToroidalModelByMeansOfBoozMagneticField(unittest.TestCase):
 
         B_modelled = B_model(s_flux, THETA, PHI)
 
-        nt.assert_allclose(B_modelled, B_on_surface, atol=1e-5, rtol=1e-5)
+        nt.assert_allclose(B_modelled, B_on_surface, atol=5e-5, rtol=5e-5)
 
 
     def test_theta_deriv(self):
@@ -72,8 +72,8 @@ class TestToroidalModelByMeansOfBoozMagneticField(unittest.TestCase):
 
         nt.assert_allclose(dB_dtheta_modelled,
                            dB_dtheta_on_surface,
-                           atol=1e-5,
-                           rtol=1e-5)
+                           atol=5e-5,
+                           rtol=5e-5)
 
 
     def test_chaining_derivatives_in_theta(self):

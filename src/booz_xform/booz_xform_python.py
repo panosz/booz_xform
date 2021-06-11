@@ -5,19 +5,48 @@ from .fourier_series import _calculate_fourier_series, DoubleFourierSeries, Toro
 
 class Booz_xform(Booz_xform_cpp):
 
+    def extrapolate_on_axis_bmnc_b(self):
+        non_zero = (self.xm_b != 1)
+        s0, s1 = self.s_b[:2]
+
+        y0 = self.bmnc_b[:, 0]
+        y1 = self.bmnc_b[:, 1]
+        out = np.zeros_like(y0)
+        out[non_zero] = (s1*y0[non_zero] - s0*y1[non_zero])/(s1 - s0)
+
+        return out
+
+    def extrapolate_on_axis_bmns_b(self):
+        non_zero = (self.xm_b != 1)
+        s0, s1 = self.s_b[:2]
+
+        y0 = self.bmns_b[:, 0]
+        y1 = self.bmns_b[:, 1]
+        out = np.zeros_like(y0)
+        out[non_zero] = (s1*y0[non_zero] - s0*y1[non_zero])/(s1 - s0)
+        return out
+
+
     def mod_B_model(self):
         if self.asym:
-            bmns_b = self.bmns_b
+            sin_ampls = self.bmns_b
+            sin_ampls_on_axis = self.extrapolate_on_axis_bmns_b()
         else:
-            bmns_b = 0
+            sin_ampls = 0
+            sin_ampls_on_axis = None
 
-        return ToroidalModel.fit(self.s_b,
-                                 self.xm_b,
-                                 self.xn_b,
-                                 self.bmnc_b,
-                                 bmns_b,
-                                 deg=15
-                                 )
+        cos_ampls = self.bmnc_b
+        cos_ampls_on_axis = self.extrapolate_on_axis_bmnc_b()
+
+        return ToroidalModel.fit_fixed_on_axis(self.s_b,
+                                               self.xm_b,
+                                               self.xn_b,
+                                               cos_ampls,
+                                               cos_ampls_on_axis,
+                                               sin_ampls,
+                                               sin_ampls_on_axis,
+                                               deg=15
+                                               )
 
     def calculate_modB_boozer_on_surface(self, js, theta, phi):
         """

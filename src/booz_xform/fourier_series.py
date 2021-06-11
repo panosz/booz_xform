@@ -284,6 +284,26 @@ class ToroidalModel():
 
         return cls(m, n, cos_ampls_model, sin_ampls_model)
 
+    @classmethod
+    def fit_fixed_on_axis(cls,
+                          r,
+                          m,
+                          n,
+                          cos_amplitudes,
+                          cos_ampls_on_axis,
+                          sin_amplitudes=0,
+                          sin_ampls_on_axis=None,
+                          deg=7):
+        m = np.array(m)
+        n = np.array(n)
+        cos_ampls_model = PolyModel.fit_fixed_constant_term(r, cos_amplitudes, cos_ampls_on_axis, deg)
+
+        if not is_scalar_and_zero(sin_amplitudes):
+            sin_ampls_model = PolyModel.fit_fixed_constant_term(r, sin_amplitudes, sin_ampls_on_axis, deg)
+        else:
+            sin_ampls_model = AlwaysReturnsZero()
+
+        return cls(m, n, cos_ampls_model, sin_ampls_model)
 
     # TODO: This should be calculated in a different method called
     # calculate_on_flux_surface
