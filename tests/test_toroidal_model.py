@@ -18,91 +18,114 @@ import numpy as np
 import numpy.testing as nt
 import booz_xform as bx
 
-cur_dir = Path(__file__).absolute().parent
-
-input_file_name = 'test_files/wout_LandremanSenguptaPlunk_section5p3.nc'
-
-INPUT_FILE = str(cur_dir / input_file_name)
+CUR_DIR = Path(__file__).absolute().parent
 
 NTHETA = 50
 NPHI = 90
 
 J_SURFACE = -1
 
-BOOZ = bx.Booz_xform()
-BOOZ.verbose = 0
-BOOZ.read_wout(INPUT_FILE)
-BOOZ.run()
 
-THETA1D = np.linspace(0, 2 * np.pi, NTHETA)
-PHI1D = np.linspace(0, 2 * np.pi / BOOZ.nfp, NPHI)
-PHI, THETA = np.meshgrid(PHI1D, THETA1D)
+class BaseTestToroidalModelByMeansOfBField():
+
+    def __init__(self, *args, **kwargs):
+        INPUT_FILE = str(CUR_DIR / self.input_file_name)
+        self.booz = bx.Booz_xform()
+        self.booz.verbose = 0
+        self.booz.read_wout(INPUT_FILE)
+        self.booz.run()
+
+        theta1d = np.linspace(0, 2 * np.pi, NTHETA)
+        phi1d = np.linspace(0, 2 * np.pi / self.booz.nfp, NPHI)
+        self.phi, self.theta = np.meshgrid(phi1d, theta1d)
+        super().__init__(*args, **kwargs)
 
 
-class TestToroidalModelByMeansOfBoozMagneticField(unittest.TestCase):
     def test_B_model_calculation(self):
-        B_on_surface = BOOZ.calculate_modB_boozer_on_surface(js=J_SURFACE,
-                                                             phi=PHI,
-                                                             theta=THETA)
+        B_on_surface = self.booz.calculate_modB_boozer_on_surface(
+            js=J_SURFACE,
+            phi=self.phi,
+            theta=self.theta
+        )
 
-        B_model = BOOZ.mod_B_model()
+        B_model = self.booz.mod_B_model()
 
-        s_flux = BOOZ.s_in[J_SURFACE]
+        s_flux = self.booz.s_in[J_SURFACE]
 
-        B_modelled = B_model(s_flux, THETA, PHI)
+        B_modelled = B_model(s_flux, self.theta, self.phi)
 
         nt.assert_allclose(B_modelled, B_on_surface, atol=5e-5, rtol=5e-5)
 
 
     def test_theta_deriv(self):
 
-        dB_dtheta_on_surface = BOOZ.calculate_modB_boozer_deriv_on_surface(
+        dB_dtheta_on_surf = self.booz.calculate_modB_boozer_deriv_on_surface(
             js=J_SURFACE,
-            phi=PHI,
-            theta=THETA,
+            phi=self.phi,
+            theta=self.theta,
             phi_order=0,
             theta_order=1)
 
 
-        dB_dtheta_model = BOOZ.mod_B_model().deriv(theta_order=1)
+        dB_dtheta_model = self.booz.mod_B_model().deriv(theta_order=1)
 
-        s_flux = BOOZ.s_in[J_SURFACE]
+        s_flux = self.booz.s_in[J_SURFACE]
 
-        dB_dtheta_modelled = dB_dtheta_model(s_flux, THETA, PHI)
+        dB_dtheta_modelled = dB_dtheta_model(s_flux, self.theta, self.phi)
 
         nt.assert_allclose(dB_dtheta_modelled,
-                           dB_dtheta_on_surface,
+                           dB_dtheta_on_surf,
                            atol=5e-5,
                            rtol=5e-5)
 
 
     def test_chaining_derivatives_in_theta(self):
 
-        s_flux = BOOZ.s_in[J_SURFACE]
+        s_flux = self.booz.s_in[J_SURFACE]
 
-        dB2_dtheta2_model1 = BOOZ.mod_B_model().deriv(theta_order=2)
-        dB2_dtheta2_model2 = BOOZ.mod_B_model().deriv(
+        dB2_dtheta2_model1 = self.booz.mod_B_model().deriv(theta_order=2)
+        dB2_dtheta2_model2 = self.booz.mod_B_model().deriv(
             theta_order=1).deriv(theta_order=1)
 
-        nt.assert_allclose(dB2_dtheta2_model1(s_flux, THETA, PHI),
-                           dB2_dtheta2_model2(s_flux, THETA, PHI),
+        nt.assert_allclose(dB2_dtheta2_model1(s_flux, self.theta, self.phi),
+                           dB2_dtheta2_model2(s_flux, self.theta, self.phi),
                            )
 
 
     def test_chaining_derivatives_mixed(self):
 
-        s_flux = BOOZ.s_in[J_SURFACE]
+        s_flux = self.booz.s_in[J_SURFACE]
 
-        dB3_dall_model1 = BOOZ.mod_B_model().deriv(r_order=1,
-                                                   theta_order=1,
-                                                   phi_order=1,
-                                                   )
-        dB3_dall_model2 = BOOZ.mod_B_model().deriv(
+        dB3_dall_model1 = self.booz.mod_B_model().deriv(r_order=1,
+                                                        theta_order=1,
+                                                        phi_order=1,
+                                                        )
+        dB3_dall_model2 = self.booz.mod_B_model().deriv(
             r_order=1).deriv(theta_order=1).deriv(phi_order=1)
 
-        nt.assert_allclose(dB3_dall_model1(s_flux, THETA, PHI),
-                           dB3_dall_model2(s_flux, THETA, PHI),
+        nt.assert_allclose(dB3_dall_model1(s_flux, self.theta, self.phi),
+                           dB3_dall_model2(s_flux, self.theta, self.phi),
                            )
+
+
+class TestWithLandreman(BaseTestToroidalModelByMeansOfBField,
+                        unittest.TestCase):
+    input_file_name = './test_files/wout_LandremanSenguptaPlunk_section5p3.nc'
+
+
+class TestWithUpDownAssymTokamak(BaseTestToroidalModelByMeansOfBField,
+                                 unittest.TestCase):
+    input_file_name = './test_files/wout_up_down_asymmetric_tokamak.nc'
+
+
+class TestWithCircularTokamak(BaseTestToroidalModelByMeansOfBField,
+                              unittest.TestCase):
+    input_file_name = './test_files/wout_circular_tokamak.nc'
+
+
+class TestWithLi383(BaseTestToroidalModelByMeansOfBField,
+                    unittest.TestCase):
+    input_file_name = './test_files/wout_li383_1.4m.nc'
 
 
 if __name__ == '__main__':
