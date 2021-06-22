@@ -52,7 +52,7 @@ class BaseTestToroidalModelByMeansOfBField():
 
         s_flux = self.booz.s_in[J_SURFACE]
 
-        B_modelled = B_model(s_flux, self.theta, self.phi)
+        B_modelled = B_model.calculate_on_surface(s_flux, self.theta, self.phi)
 
         nt.assert_allclose(B_modelled, B_on_surface, atol=5e-5, rtol=5e-5)
 
@@ -71,7 +71,9 @@ class BaseTestToroidalModelByMeansOfBField():
 
         s_flux = self.booz.s_in[J_SURFACE]
 
-        dB_dtheta_modelled = dB_dtheta_model(s_flux, self.theta, self.phi)
+        dB_dtheta_modelled = dB_dtheta_model.calculate_on_surface(s_flux,
+                                                                  self.theta,
+                                                                  self.phi)
 
         nt.assert_allclose(dB_dtheta_modelled,
                            dB_dtheta_on_surf,
@@ -87,8 +89,12 @@ class BaseTestToroidalModelByMeansOfBField():
         dB2_dtheta2_model2 = self.booz.mod_B_model().deriv(
             theta_order=1).deriv(theta_order=1)
 
-        nt.assert_allclose(dB2_dtheta2_model1(s_flux, self.theta, self.phi),
-                           dB2_dtheta2_model2(s_flux, self.theta, self.phi),
+        nt.assert_allclose(dB2_dtheta2_model1.calculate_on_surface(s_flux,
+                                                                   self.theta,
+                                                                   self.phi),
+                           dB2_dtheta2_model2.calculate_on_surface(s_flux,
+                                                                   self.theta,
+                                                                   self.phi),
                            )
 
 
@@ -103,8 +109,12 @@ class BaseTestToroidalModelByMeansOfBField():
         dB3_dall_model2 = self.booz.mod_B_model().deriv(
             r_order=1).deriv(theta_order=1).deriv(phi_order=1)
 
-        nt.assert_allclose(dB3_dall_model1(s_flux, self.theta, self.phi),
-                           dB3_dall_model2(s_flux, self.theta, self.phi),
+        nt.assert_allclose(dB3_dall_model1.calculate_on_surface(s_flux,
+                                                                self.theta,
+                                                                self.phi),
+                           dB3_dall_model2.calculate_on_surface(s_flux,
+                                                                self.theta,
+                                                                self.phi),
                            )
 
 

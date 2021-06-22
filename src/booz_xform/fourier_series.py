@@ -305,10 +305,25 @@ class ToroidalModel():
 
         return cls(m, n, cos_ampls_model, sin_ampls_model)
 
-    # TODO: This should be calculated in a different method called
-    # calculate_on_flux_surface
+    def calculate_on_surface(self, r, theta, phi):
+        """
+        Calculate the model on a single surface `r` at multiple toroidal and
+        poloidal angles.
 
-    def __call__(self, r, theta, phi):
+        Parameters:
+        -----------
+        r: float,
+            The surface
+
+        theta, phi: array, shape=(N) or shape=(N, M)
+            The toroidal and poloidal angles. `theta` and `phi` must have the same shape.
+
+        Returns:
+        --------
+
+        out: array, shape=(N) or shape = (N, M)
+            The model calculated at the given positions.
+        """
 
         cos_ampls = self.cos_ampls_model(r)
         sin_ampls = self.sin_ampls_model(r)
