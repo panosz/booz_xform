@@ -20,8 +20,8 @@ import booz_xform as bx
 
 CUR_DIR = Path(__file__).absolute().parent
 
-NTHETA = 50
-NPHI = 90
+NTHETA = 10
+NPHI = 10
 
 J_SURFACE = -1
 
@@ -55,6 +55,42 @@ class BaseTestToroidalModelByMeansOfBField():
         B_modelled = B_model.calculate_on_surface(s_flux, self.theta, self.phi)
 
         nt.assert_allclose(B_modelled, B_on_surface, atol=5e-5, rtol=5e-5)
+
+    def test_call_and_calculate_on_surface_compatibility(self):
+
+        B_model = self.booz.mod_B_model()
+
+        s_flux = self.booz.s_in[J_SURFACE]
+
+        phi_rav = self.phi.ravel()
+        theta_rav = self.theta.ravel()
+
+        s_flux_full = np.full_like(phi_rav, fill_value=s_flux)
+
+
+        B_on_surface = B_model.calculate_on_surface(s_flux, self.theta, self.phi)
+
+        B_call_on_surface = B_model(s_flux_full, theta_rav, phi_rav).reshape(self.phi.shape)
+
+        nt.assert_allclose(B_on_surface, B_call_on_surface)
+
+
+    def test_call_scalar_and_vector_consistency(self):
+
+        B_model = self.booz.mod_B_model()
+        s_flux = self.booz.s_in[J_SURFACE]
+
+        phi = self.phi[0, 5]
+        theta = self.theta[0, 8]
+
+        B_scalar = B_model(s_flux, theta, phi)
+
+        B_vector = B_model(np.repeat(s_flux, 3),
+                           np.repeat(theta, 3),
+                           np.repeat(phi, 3),
+                           )
+
+        nt.assert_allclose(np.repeat(B_scalar, 3), B_vector)
 
 
     def test_theta_deriv(self):

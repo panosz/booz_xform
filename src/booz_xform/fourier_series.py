@@ -305,6 +305,50 @@ class ToroidalModel():
 
         return cls(m, n, cos_ampls_model, sin_ampls_model)
 
+
+    def __call__(self, r, theta, phi):
+        """
+        Calculate the model at the given positions.
+
+        Parameters:
+        -----------
+        `r`, `theta`, `phi`: array, shape = (N, )
+            The toroidal coordinates of the positions.
+
+        Returns:
+        --------
+
+        out: array, shape = (N,)
+           The model calculated at the given positions.
+
+        Notes:
+        ------
+        For calculations on a single surface you should use
+        `calculate_on_surface`
+        """
+
+        if np.ndim(r) > 1:
+            raise ValueError("Input must be scalar or 1D")
+
+        if not (np.shape(r) == np.shape(theta) == np.shape(phi)):
+            raise ValueError("Incompatible shapes of parameters")
+
+        size = np.size(r)
+
+        if size == 0:
+            return np.array([], dtype=float)
+
+        if size == 1:
+            return self.calculate_on_surface(r, theta, phi)
+
+        out = np.empty_like(r)
+
+        for i in range(size):
+            out[i] = self.calculate_on_surface(r[i], theta[i], phi[i])
+
+        return out
+
+
     def calculate_on_surface(self, r, theta, phi):
         """
         Calculate the model on a single surface `r` at multiple toroidal and
