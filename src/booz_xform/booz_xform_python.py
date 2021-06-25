@@ -1,9 +1,21 @@
 import numpy as np
 from ._booz_xform import Booz_xform as Booz_xform_cpp
 from .fourier_series import _calculate_fourier_series, DoubleFourierSeries, ToroidalModel
+from .polynomials import Poly
+
 
 
 class Booz_xform(Booz_xform_cpp):
+
+    def run(self, *args, **kwargs):
+        super().run(*args, **kwargs)
+        self.g = self.g_model()
+        self.iota_m = self.iota_model()
+        self.I = self.I_model()
+
+    def q(self, s):
+        return 1/self.iota_m(s)
+
 
     def extrapolate_on_axis_bmnc_b(self):
         non_zero = (self.xm_b != 1)
@@ -26,6 +38,40 @@ class Booz_xform(Booz_xform_cpp):
         out[non_zero] = (s1*y0[non_zero] - s0*y1[non_zero])/(s1 - s0)
         return out
 
+
+    def g_model(self):
+        x = np.concatenate([[0], self.s_b])
+        y = np.concatenate([[self.extrapolate_on_axis_G()],
+                            self.Boozer_G]
+                           )
+        return Poly.fit(x, y, deg=10)
+
+
+    def I_model(self):
+        x = np.concatenate([[0], self.s_b])
+        y = np.concatenate([[self.extrapolate_on_axis_I()],
+                            self.Boozer_I]
+                           )
+        return Poly.fit(x, y, deg=10)
+
+    def iota_model(self):
+        x = np.concatenate([[0], self.s_b])
+        y = np.concatenate([[self.extrapolate_on_axis_iota()],
+                            self.iota]
+                           )
+        return Poly.fit(x, y, deg=10)
+
+    def extrapolate_on_axis_G(self):
+        G_axis = 1.5 * self.Boozer_G[0] - 0.5 * self.Boozer_G[1]
+        return G_axis
+
+    def extrapolate_on_axis_I(self):
+        I_axis = 1.5 * self.Boozer_I[0] - 0.5 * self.Boozer_I[1]
+        return I_axis
+
+    def extrapolate_on_axis_iota(self):
+        iota_axis = 1.5 * self.iota[0] - 0.5 * self.iota[1]
+        return iota_axis
 
     def mod_B_model(self):
         if self.asym:
