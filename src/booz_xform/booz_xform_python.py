@@ -3,15 +3,72 @@ from ._booz_xform import Booz_xform as Booz_xform_cpp
 from .fourier_series import _calculate_fourier_series, DoubleFourierSeries, ToroidalModel
 from .polynomials import Poly
 
+class _FluxModelBuilder():
+    """
+    Factory for polynomial functions of flux quantities sampled on
+    the half grid.
+
+    Parameters:
+    -----------
+    s_b: array,
+        The values of the boozer flux surfaces (half-grid)
+    """
+
+    def __init__(self, s_b):
+        self.s_b = s_b
+
+    def _extrapolate_flux_quantity_on_axis_half_grid(self, f_half):
+        """
+        Given a flux quantity series `f_half` which is sampled on the half
+        grid, extrapolate it on the magnetic axis.
+        """
+        s0, s1 = self.s_b[:2]
+        y0, y1 = f_half[:2]
+        f_on_axis = (s1*y0 - s0*y1)/(s1 - s0)
+        return f_on_axis
+
+    def build(self, f_half, deg):
+        """
+        Given a flux quantity series `f_half` which is sampled on the half
+        grid, return a polynomial fit for `f_half`
+        """
+        x = np.concatenate([[0], self.s_b])
+        y_on_axis = self._extrapolate_flux_quantity_on_axis_half_grid(f_half)
+        y = np.concatenate([[y_on_axis], f_half])
+        return Poly.fit(x, y, deg=deg)
+
+
 
 
 class Booz_xform(Booz_xform_cpp):
 
+    degrees_for_flux_polynomials = {
+        "g": 4,
+        "I": 4,
+        "iota": 4,
+    }
+
     def run(self, *args, **kwargs):
         super().run(*args, **kwargs)
-        self.g = self.g_model()
-        self.iota_m = self.iota_model()
-        self.I = self.I_model()
+        self._build_flux_models()
+
+    def _build_flux_models(self):
+        f_model_builder = _FluxModelBuilder(self.s_b)
+
+        self.g = f_model_builder.build(
+            self.Boozer_G,
+            deg=self.degrees_for_flux_polynomials["g"]
+        )
+
+        self.I = f_model_builder.build(
+            self.Boozer_I,
+            deg=self.degrees_for_flux_polynomials["I"],
+        )
+
+        self.iota_m = f_model_builder.build(
+            self.iota,
+            deg=self.degrees_for_flux_polynomials["iota"],
+        )
 
     def q(self, s):
         return 1/self.iota_m(s)
@@ -38,40 +95,6 @@ class Booz_xform(Booz_xform_cpp):
         out[non_zero] = (s1*y0[non_zero] - s0*y1[non_zero])/(s1 - s0)
         return out
 
-
-    def g_model(self):
-        x = np.concatenate([[0], self.s_b])
-        y = np.concatenate([[self.extrapolate_on_axis_G()],
-                            self.Boozer_G]
-                           )
-        return Poly.fit(x, y, deg=10)
-
-
-    def I_model(self):
-        x = np.concatenate([[0], self.s_b])
-        y = np.concatenate([[self.extrapolate_on_axis_I()],
-                            self.Boozer_I]
-                           )
-        return Poly.fit(x, y, deg=10)
-
-    def iota_model(self):
-        x = np.concatenate([[0], self.s_b])
-        y = np.concatenate([[self.extrapolate_on_axis_iota()],
-                            self.iota]
-                           )
-        return Poly.fit(x, y, deg=10)
-
-    def extrapolate_on_axis_G(self):
-        G_axis = 1.5 * self.Boozer_G[0] - 0.5 * self.Boozer_G[1]
-        return G_axis
-
-    def extrapolate_on_axis_I(self):
-        I_axis = 1.5 * self.Boozer_I[0] - 0.5 * self.Boozer_I[1]
-        return I_axis
-
-    def extrapolate_on_axis_iota(self):
-        iota_axis = 1.5 * self.iota[0] - 0.5 * self.iota[1]
-        return iota_axis
 
     def mod_B_model(self):
         if self.asym:
