@@ -7,6 +7,8 @@ from booz_xform.fourier_series import DoubleFourierSeries
 
 
 RANDOM_GENERATOR = np.random.default_rng(seed=42)
+THETA_INT = 1
+ZETA_INT = 2
 THETA = 2*np.pi * RANDOM_GENERATOR.random(10)
 ZETA = 2*np.pi * RANDOM_GENERATOR.random(10)
 
@@ -120,6 +122,16 @@ class TestDoubleFourierSeries(unittest.TestCase):
         expected_result = self.explicit_fourier_series(THETA, ZETA)
 
         actual = fs(THETA, ZETA)
+
+        nt.assert_allclose(actual, expected_result, atol=1e-10, rtol=1e-10)
+
+
+    def test_call_with_scalar_int(self):
+        fs = self.get_fourier_series()
+
+        expected_result = self.explicit_fourier_series(THETA_INT, ZETA_INT)
+
+        actual = fs(THETA_INT, ZETA_INT)
 
         nt.assert_allclose(actual, expected_result, atol=1e-10, rtol=1e-10)
 

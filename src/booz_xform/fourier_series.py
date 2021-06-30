@@ -46,7 +46,7 @@ def _calculate_fourier_series(m, n, cos_mn_ampl, sin_mn_ampl, theta, phi):
 
     """
 
-    out = np.zeros_like(phi)
+    out = np.zeros_like(phi, dtype=float)
 
     for jmn in range(len(m)):
 
