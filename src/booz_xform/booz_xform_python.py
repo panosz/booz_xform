@@ -1,4 +1,5 @@
 import numpy as np
+import netCDF4 as nc
 from ._booz_xform import Booz_xform as Booz_xform_cpp
 from .fourier_series import _calculate_fourier_series, DoubleFourierSeries, ToroidalModel
 from .polynomials import Poly
@@ -53,6 +54,12 @@ class _FluxModelBuilder():
         return Poly.fit(x, y, deg=deg)
 
 
+def _read_toroidal_flux_full_wout(wout_file):
+    """
+    Reads the toroidal flux (full grid) from a wout file.
+    """
+    ds = nc.Dataset(wout_file)
+    return ds.variables['phi'][:].data
 
 
 class Booz_xform(Booz_xform_cpp):
@@ -62,6 +69,20 @@ class Booz_xform(Booz_xform_cpp):
         "I": 4,
         "iota": 4,
     }
+
+
+    def read_wout(self, wout_file):
+        wout_file = str(wout_file)
+        super().read_wout(wout_file)
+
+        psi_f = _read_toroidal_flux_full_wout(wout_file)
+
+        psi_half = 0.5 * (psi_f[:-1] + psi_f[1:])
+
+        self.psi_in = psi_half
+
+        self.psi_lcfs = psi_f[-1]
+
 
     def run(self, *args, **kwargs):
         super().run(*args, **kwargs)
