@@ -52,23 +52,34 @@ class Booz_xform(Booz_xform_cpp):
         super().run(*args, **kwargs)
         self._build_flux_models()
 
+    def _build_boozer_flux_models(self):
+
+        if self.s_b.size > 1:
+            builder = _FluxModelBuilder(self.s_b)
+
+            self.g = builder.build(
+                self.Boozer_G,
+                deg=self.degrees_for_flux_polynomials["g"]
+            )
+
+            self.I = builder.build(
+                self.Boozer_I,
+                deg=self.degrees_for_flux_polynomials["I"],
+            )
+
+    def _build_input_flux_models(self):
+        if self.s_in.size > 1:
+            builder = _FluxModelBuilder(self.s_in)
+
+            self.iota_m = builder.build(
+                self.iota,
+                deg=self.degrees_for_flux_polynomials["iota"],
+            )
+
     def _build_flux_models(self):
-        f_model_builder = _FluxModelBuilder(self.s_b)
+        self._build_input_flux_models()
+        self._build_boozer_flux_models()
 
-        self.g = f_model_builder.build(
-            self.Boozer_G,
-            deg=self.degrees_for_flux_polynomials["g"]
-        )
-
-        self.I = f_model_builder.build(
-            self.Boozer_I,
-            deg=self.degrees_for_flux_polynomials["I"],
-        )
-
-        self.iota_m = f_model_builder.build(
-            self.iota,
-            deg=self.degrees_for_flux_polynomials["iota"],
-        )
 
     def q(self, s):
         return 1/self.iota_m(s)
