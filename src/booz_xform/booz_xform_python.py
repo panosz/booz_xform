@@ -86,12 +86,13 @@ class Booz_xform(Booz_xform_cpp):
 
     def run(self, *args, **kwargs):
         super().run(*args, **kwargs)
+        self.psi_b = self.s_b * self.psi_lcfs
         self._build_flux_models()
 
     def _build_boozer_flux_models(self):
 
         if self.s_b.size > 1:
-            builder = _FluxModelBuilder(self.s_b)
+            builder = _FluxModelBuilder(self.psi_b)
 
             self.g = builder.build(
                 self.Boozer_G,
@@ -105,7 +106,7 @@ class Booz_xform(Booz_xform_cpp):
 
     def _build_input_flux_models(self):
         if self.s_in.size > 1:
-            builder = _FluxModelBuilder(self.s_in)
+            builder = _FluxModelBuilder(self.psi_in)
 
             self.iota_m = builder.build(
                 self.iota,
