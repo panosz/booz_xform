@@ -31,7 +31,22 @@ class _FluxModelBuilder():
         """
         Given a flux quantity series `f_half` which is sampled on the half
         grid, return a polynomial fit for `f_half`
+
+        Parameters:
+        -----------
+        f_half: array, shape(N)
+            the flux quantity on the half grid
+
+        deg: int, positive
+            The desired degree of the polynomial model.
+            This is not always equal to the actual degree of the returned
+            model. See "Notes", for more information.
+
+        Notes:
+        ------
+        If `deg` > `N`, then a model of degree= `N` is returned.
         """
+        deg = min(deg, self.s_b.size)
         x = np.concatenate([[0], self.s_b])
         y_on_axis = self._extrapolate_flux_quantity_on_axis_half_grid(f_half)
         y = np.concatenate([[y_on_axis], f_half])
