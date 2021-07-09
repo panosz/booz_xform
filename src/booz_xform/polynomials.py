@@ -7,9 +7,32 @@ Copyright (c) 2005-2021, NumPy Developers.
 """
 import warnings
 import numpy as np
-from numpy.polynomial import Polynomial as Poly
+from numpy.polynomial import Polynomial
 from numpy.polynomial import polyutils as pu
 from numpy.polynomial.polynomial import polyval, polyfit, polyder, polyvander
+
+
+class Poly(Polynomial):
+
+    def integ(self, *args, **kwargs):
+        """
+        A saner integration, when `window` != `domain`.
+
+        Notes:
+        ------
+
+        Polynomial.integ() does not offer good control of the integration
+        constant, when `window` does not equal `domain` and parameters must be
+        mapped.  This situation is rectified here.
+        """
+
+        out = self.convert(window=None,
+                           domain=None,
+                           kind=Polynomial).integ(*args, **kwargs)
+
+        return out.convert(window=self.window,
+                           domain=self.domain,
+                           kind=type(self))
 
 
 class PolyCollection:
