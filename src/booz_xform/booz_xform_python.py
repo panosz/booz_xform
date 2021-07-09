@@ -113,9 +113,22 @@ class Booz_xform(Booz_xform_cpp):
                 deg=self.degrees_for_flux_polynomials["iota"],
             )
 
+    def _build_psi_p_model(self):
+        R"""
+        Calculate a psi_p model by integrating iota_m:
+
+        psi_p = \int iota dpsi
+
+        NOTE that there is an implicit COCOS choice hidden here.
+        For more, see test files.
+        """
+        self.psi_p = self.iota_m.integ()
+
+
     def _build_flux_models(self):
         self._build_input_flux_models()
         self._build_boozer_flux_models()
+        self._build_psi_p_model()
 
 
     def q(self, s):
