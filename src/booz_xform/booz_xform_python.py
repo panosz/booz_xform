@@ -168,7 +168,7 @@ class Booz_xform(Booz_xform_cpp):
         cos_ampls = self.bmnc_b
         cos_ampls_on_axis = self.extrapolate_on_axis_bmnc_b()
 
-        return ToroidalModel.fit_fixed_on_axis(self.s_b,
+        return ToroidalModel.fit_fixed_on_axis(self.psi_b,
                                                self.xm_b,
                                                self.xn_b,
                                                cos_ampls,

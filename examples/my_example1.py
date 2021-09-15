@@ -61,7 +61,7 @@ dB_dtheta = b.calculate_modB_boozer_deriv_on_surface(js=-1, phi=phi, theta=theta
 
 dB_dtheta_model = B_model.deriv(r_order=0, theta_order=1, phi_order=0)
 
-dB_dtheta_modelled = dB_dtheta_model.calculate_on_surface(b.s_in[-1],
+dB_dtheta_modelled = dB_dtheta_model.calculate_on_surface(b.psi_b[-1],
                                                           theta,
                                                           phi)
 
@@ -70,11 +70,11 @@ dB2_dtheta2_model1 = B_model.deriv(r_order=0, theta_order=2, phi_order=0)
 dB2_dtheta2_model2 = dB_dtheta_model.deriv(r_order=0, theta_order=1, phi_order=0)
 
 
-dB2_dtheta2_modelled_1 = dB2_dtheta2_model1.calculate_on_surface(b.s_in[-1],
+dB2_dtheta2_modelled_1 = dB2_dtheta2_model1.calculate_on_surface(b.psi_b[-1],
                                                                  theta,
                                                                  phi)
 
-dB2_dtheta2_modelled_2 = dB2_dtheta2_model2.calculate_on_surface(b.s_in[-1],
+dB2_dtheta2_modelled_2 = dB2_dtheta2_model2.calculate_on_surface(b.psi_b[-1],
                                                                  theta,
                                                                  phi)
 end = time.time()

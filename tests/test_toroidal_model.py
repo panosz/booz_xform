@@ -50,9 +50,9 @@ class BaseTestToroidalModelByMeansOfBField():
 
         B_model = self.booz.mod_B_model()
 
-        s_flux = self.booz.s_in[J_SURFACE]
+        psi_b = self.booz.psi_b[J_SURFACE]
 
-        B_modelled = B_model.calculate_on_surface(s_flux, self.theta, self.phi)
+        B_modelled = B_model.calculate_on_surface(psi_b, self.theta, self.phi)
 
         nt.assert_allclose(B_modelled, B_on_surface, atol=5e-5, rtol=5e-5)
 
@@ -60,15 +60,15 @@ class BaseTestToroidalModelByMeansOfBField():
 
         B_model = self.booz.mod_B_model()
 
-        s_flux = self.booz.s_in[J_SURFACE]
+        psi_b = self.booz.psi_b[J_SURFACE]
 
         phi_rav = self.phi.ravel()
         theta_rav = self.theta.ravel()
 
-        s_flux_full = np.full_like(phi_rav, fill_value=s_flux)
+        s_flux_full = np.full_like(phi_rav, fill_value=psi_b)
 
 
-        B_on_surface = B_model.calculate_on_surface(s_flux, self.theta, self.phi)
+        B_on_surface = B_model.calculate_on_surface(psi_b, self.theta, self.phi)
 
         B_call_on_surface = B_model(s_flux_full, theta_rav, phi_rav).reshape(self.phi.shape)
 
@@ -78,14 +78,14 @@ class BaseTestToroidalModelByMeansOfBField():
     def test_call_scalar_and_vector_consistency(self):
 
         B_model = self.booz.mod_B_model()
-        s_flux = self.booz.s_in[J_SURFACE]
+        psi_b = self.booz.psi_b[J_SURFACE]
 
         phi = self.phi[0, 5]
         theta = self.theta[0, 8]
 
-        B_scalar = B_model(s_flux, theta, phi)
+        B_scalar = B_model(psi_b, theta, phi)
 
-        B_vector = B_model(np.repeat(s_flux, 3),
+        B_vector = B_model(np.repeat(psi_b, 3),
                            np.repeat(theta, 3),
                            np.repeat(phi, 3),
                            )
@@ -105,9 +105,9 @@ class BaseTestToroidalModelByMeansOfBField():
 
         dB_dtheta_model = self.booz.mod_B_model().deriv(theta_order=1)
 
-        s_flux = self.booz.s_in[J_SURFACE]
+        psi_b = self.booz.psi_b[J_SURFACE]
 
-        dB_dtheta_modelled = dB_dtheta_model.calculate_on_surface(s_flux,
+        dB_dtheta_modelled = dB_dtheta_model.calculate_on_surface(psi_b,
                                                                   self.theta,
                                                                   self.phi)
 
@@ -119,16 +119,16 @@ class BaseTestToroidalModelByMeansOfBField():
 
     def test_chaining_derivatives_in_theta(self):
 
-        s_flux = self.booz.s_in[J_SURFACE]
+        psi_b = self.booz.psi_b[J_SURFACE]
 
         dB2_dtheta2_model1 = self.booz.mod_B_model().deriv(theta_order=2)
         dB2_dtheta2_model2 = self.booz.mod_B_model().deriv(
             theta_order=1).deriv(theta_order=1)
 
-        nt.assert_allclose(dB2_dtheta2_model1.calculate_on_surface(s_flux,
+        nt.assert_allclose(dB2_dtheta2_model1.calculate_on_surface(psi_b,
                                                                    self.theta,
                                                                    self.phi),
-                           dB2_dtheta2_model2.calculate_on_surface(s_flux,
+                           dB2_dtheta2_model2.calculate_on_surface(psi_b,
                                                                    self.theta,
                                                                    self.phi),
                            )
@@ -136,7 +136,7 @@ class BaseTestToroidalModelByMeansOfBField():
 
     def test_chaining_derivatives_mixed(self):
 
-        s_flux = self.booz.s_in[J_SURFACE]
+        psi_b = self.booz.psi_b[J_SURFACE]
 
         dB3_dall_model1 = self.booz.mod_B_model().deriv(r_order=1,
                                                         theta_order=1,
@@ -145,10 +145,10 @@ class BaseTestToroidalModelByMeansOfBField():
         dB3_dall_model2 = self.booz.mod_B_model().deriv(
             r_order=1).deriv(theta_order=1).deriv(phi_order=1)
 
-        nt.assert_allclose(dB3_dall_model1.calculate_on_surface(s_flux,
+        nt.assert_allclose(dB3_dall_model1.calculate_on_surface(psi_b,
                                                                 self.theta,
                                                                 self.phi),
-                           dB3_dall_model2.calculate_on_surface(s_flux,
+                           dB3_dall_model2.calculate_on_surface(psi_b,
                                                                 self.theta,
                                                                 self.phi),
                            )
