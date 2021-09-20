@@ -30,9 +30,9 @@ class BaseTestBoozXform():
         Test that the psi_in attribute is consistent with the s_in attribute
         """
         psi_in = self.booz.psi_in
-        psi_lcfs = self.booz.psi_lcfs
+        toroidal_flux = self.booz.toroidal_flux
 
-        psi_in_computed = self.booz.s_in * psi_lcfs
+        psi_in_computed = self.booz.s_in * toroidal_flux
 
         nt.assert_allclose(psi_in, psi_in_computed, atol=1e-10, rtol=1e-10)
 
@@ -54,7 +54,7 @@ class BaseTestBoozXform():
 
         n_full_grid = len(self.booz.s_in)+1
         s_full_grid = np.linspace(0, 1, num=n_full_grid)
-        psi_full_grid = s_full_grid * self.booz.psi_lcfs
+        psi_full_grid = s_full_grid * self.booz.toroidal_flux
 
         psi_p_modelled = self.booz.psi_p(psi_full_grid)
 

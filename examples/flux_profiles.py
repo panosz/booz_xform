@@ -21,8 +21,8 @@ psi_pf = ds.variables['chi'][:].data
 
 b.run()
 
-psi_in = s_f * b.psi_lcfs
-psi_i = np.linspace(0, b.psi_lcfs)
+psi_in = s_f * b.toroidal_flux
+psi_i = np.linspace(0, b.toroidal_flux)
 
 fig, axs = plt.subplots(2,3,tight_layout=True)
 

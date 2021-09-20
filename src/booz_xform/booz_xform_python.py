@@ -3,6 +3,7 @@ import netCDF4 as nc
 from ._booz_xform import Booz_xform as Booz_xform_cpp
 from .fourier_series import _calculate_fourier_series, DoubleFourierSeries, ToroidalModel
 from .polynomials import Poly
+from .utilities import find_y_axis_crossing
 
 class _FluxModelBuilder():
     """
@@ -25,7 +26,7 @@ class _FluxModelBuilder():
         """
         s0, s1 = self.s_b[:2]
         y0, y1 = f_half[:2]
-        f_on_axis = (s1*y0 - s0*y1)/(s1 - s0)
+        f_on_axis = find_y_axis_crossing(s0, s1, y0, y1)
         return f_on_axis
 
     def build(self, f_half, deg):
@@ -81,12 +82,12 @@ class Booz_xform(Booz_xform_cpp):
 
         self.psi_in = psi_half
 
-        self.psi_lcfs = psi_f[-1]
+        self.toroidal_flux = psi_f[-1]
 
 
     def run(self, *args, **kwargs):
         super().run(*args, **kwargs)
-        self.psi_b = self.s_b * self.psi_lcfs
+        self.psi_b = self.s_b * self.toroidal_flux
         self._build_flux_models()
 
     def _build_boozer_flux_models(self):
@@ -142,7 +143,10 @@ class Booz_xform(Booz_xform_cpp):
         y0 = self.bmnc_b[:, 0]
         y1 = self.bmnc_b[:, 1]
         out = np.zeros_like(y0)
-        out[non_zero] = (s1*y0[non_zero] - s0*y1[non_zero])/(s1 - s0)
+        out[non_zero] = find_y_axis_crossing(s0,
+                                             s1,
+                                             y0[non_zero],
+                                             y1[non_zero])
 
         return out
 
@@ -153,7 +157,10 @@ class Booz_xform(Booz_xform_cpp):
         y0 = self.bmns_b[:, 0]
         y1 = self.bmns_b[:, 1]
         out = np.zeros_like(y0)
-        out[non_zero] = (s1*y0[non_zero] - s0*y1[non_zero])/(s1 - s0)
+        out[non_zero] = find_y_axis_crossing(s0,
+                                             s1,
+                                             y0[non_zero],
+                                             y1[non_zero])
         return out
 
 
