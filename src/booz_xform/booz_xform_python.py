@@ -137,7 +137,11 @@ class Booz_xform(Booz_xform_cpp):
 
 
     def extrapolate_on_axis_bmnc_b(self):
-        non_zero = (self.xm_b != 1)
+        non_zero = (self.xm_b == 0)
+        # The line above used to be:
+        #  non_zero = (self.xm_b != 1)
+        # This must have been by mistake, but I am not 100% sure.
+        # The current version makes more sense to me now.
         s0, s1 = self.s_b[:2]
 
         y0 = self.bmnc_b[:, 0]
@@ -151,7 +155,11 @@ class Booz_xform(Booz_xform_cpp):
         return out
 
     def extrapolate_on_axis_bmns_b(self):
-        non_zero = (self.xm_b != 1)
+        non_zero = (self.xm_b == 0)
+        # The line above used to be:
+        #  non_zero = (self.xm_b != 1)
+        # This must have been by mistake, but I am not 100% sure.
+        # The current version makes more sense to me now.
         s0, s1 = self.s_b[:2]
 
         y0 = self.bmns_b[:, 0]

@@ -16,24 +16,26 @@ B = np.c_[b.extrapolate_on_axis_bmnc_b(), b.bmnc_b]
 
 A0n = B[b.xm_b == 0, :]
 
-xn = b.xn_b[b.xm_b == 0]
+B0n = B[b.xm_b != 0, :]
 
 fig, ax = plt.subplots()
 
 for y in A0n:
-    ax.plot(np.append([0],b.s_b), y)
+    ax.plot(np.append([0],b.s_b), y, 'r')
 
+for y in B0n:
+    ax.plot(np.append([0],b.s_b), y, 'k')
 
-S = np.c_[b.extrapolate_on_axis_bmns_b(), b.bmns_b]
+#  S = np.c_[b.extrapolate_on_axis_bmns_b(), b.bmns_b]
 
-A0n = S[b.xm_b == 0, :]
+#  A0n = S[b.xm_b == 0, :]
 
-xn = b.xn_b[b.xm_b == 0]
+#  xn = b.xn_b[b.xm_b == 0]
 
-fig, ax = plt.subplots()
+#  fig, ax = plt.subplots()
 
-for y in A0n:
-    ax.plot(np.append([0],b.s_b), y)
+#  for y in A0n:
+    #  ax.plot(np.append([0],b.s_b), y)
 
 plt.show()
 

@@ -114,7 +114,7 @@ class BaseTestToroidalModelByMeansOfBField():
         nt.assert_allclose(dB_dtheta_modelled,
                            dB_dtheta_on_surf,
                            atol=5e-5,
-                           rtol=5e-5)
+                           rtol=8e-5)
 
 
     def test_chaining_derivatives_in_theta(self):
