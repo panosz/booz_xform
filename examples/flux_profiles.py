@@ -6,8 +6,8 @@ import netCDF4 as nc
 
 b = bx.Booz_xform()
 
-#  wout_file = '../tests/test_files/wout_up_down_asymmetric_tokamak.nc'
-wout_file = '../tests/test_files/wout_li383_1.4m.nc'
+wout_file = '../tests/test_files/wout_up_down_asymmetric_tokamak.nc'
+#  wout_file = '../tests/test_files/wout_li383_1.4m.nc'
 
 b.read_wout(wout_file)
 
