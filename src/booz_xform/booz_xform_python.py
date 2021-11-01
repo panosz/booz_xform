@@ -136,7 +136,7 @@ class Booz_xform(Booz_xform_cpp):
         return 1/self.iota_m(s)
 
 
-    def extrapolate_on_axis_bmnc_b(self):
+    def _extrapolate_on_axis_boozer(self, boozer_quantity):
         non_zero = (self.xm_b == 0)
         # The line above used to be:
         #  non_zero = (self.xm_b != 1)
@@ -144,8 +144,8 @@ class Booz_xform(Booz_xform_cpp):
         # The current version makes more sense to me now.
         s0, s1 = self.s_b[:2]
 
-        y0 = self.bmnc_b[:, 0]
-        y1 = self.bmnc_b[:, 1]
+        y0 = boozer_quantity[:, 0]
+        y1 = boozer_quantity[:, 1]
         out = np.zeros_like(y0)
         out[non_zero] = find_y_axis_crossing(s0,
                                              s1,
@@ -153,35 +153,16 @@ class Booz_xform(Booz_xform_cpp):
                                              y1[non_zero])
 
         return out
+
+    def extrapolate_on_axis_bmnc_b(self):
+        return self._extrapolate_on_axis_boozer(self.bmnc_b)
 
     def extrapolate_on_axis_bmns_b(self):
-        non_zero = (self.xm_b == 0)
-        # The line above used to be:
-        #  non_zero = (self.xm_b != 1)
-        # This must have been by mistake, but I am not 100% sure.
-        # The current version makes more sense to me now.
-        s0, s1 = self.s_b[:2]
+        return self._extrapolate_on_axis_boozer(self.bmns_b)
 
-        y0 = self.bmns_b[:, 0]
-        y1 = self.bmns_b[:, 1]
-        out = np.zeros_like(y0)
-        out[non_zero] = find_y_axis_crossing(s0,
-                                             s1,
-                                             y0[non_zero],
-                                             y1[non_zero])
-        return out
-
-
-    def mod_B_model(self):
-        if self.asym:
-            sin_ampls = self.bmns_b
-            sin_ampls_on_axis = self.extrapolate_on_axis_bmns_b()
-        else:
-            sin_ampls = 0
-            sin_ampls_on_axis = None
-
-        cos_ampls = self.bmnc_b
-        cos_ampls_on_axis = self.extrapolate_on_axis_bmnc_b()
+    def _make_toroidal_model_boozer(self, cos_ampls, sin_ampls):
+        sin_ampls_on_axis = self._extrapolate_on_axis_boozer(sin_ampls)
+        cos_ampls_on_axis = self._extrapolate_on_axis_boozer(cos_ampls)
 
         return ToroidalModel.fit_fixed_on_axis(self.psi_b,
                                                self.xm_b,
@@ -192,6 +173,15 @@ class Booz_xform(Booz_xform_cpp):
                                                sin_ampls_on_axis,
                                                deg=15
                                                )
+
+    def mod_B_model(self):
+        return self._make_toroidal_model_boozer(self.bmnc_b, self.bmns_b)
+
+    def R_model(self):
+        return self._make_toroidal_model_boozer(self.rmnc_b, self.rmns_b)
+
+    def Z_model(self):
+        return self._make_toroidal_model_boozer(self.zmnc_b, self.zmns_b)
 
     def calculate_modB_boozer_on_surface(self, js, theta, phi):
         """
